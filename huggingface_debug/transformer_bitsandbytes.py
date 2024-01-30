@@ -20,9 +20,9 @@ def process_func(example):
         "labels": labels
     }
 
-ds = Dataset.load_from_disk("./demo_data/alpaca_data_zh/")
+ds = Dataset.load_from_disk("/wangjiatai/project/algorithm/huggingface_debug/demo_data/alpaca_data_zh")
 print(len("以下是保持健康的三个提示：\n\n1. 保持身体活动。每天做适当的身体运动，如散步、跑步或游泳，能促进心血管健康，增强肌肉力量，并有助于减少体重。"))
-tokenizer = AutoTokenizer.from_pretrained("/root/autodl-tmp/Llama-2-7b-chat-hf")
+tokenizer = AutoTokenizer.from_pretrained("/wangjiatai/weight/Llama-2-7b-chat-hf")
 tokenizer.padding_side = "right"  # 一定要设置padding_side为right，否则batch大于1时可能不收敛
 
 
@@ -32,7 +32,7 @@ print(tokenizer.decode(tokenized_ds[0]["input_ids"]))
 print(tokenizer("呀", add_special_tokens=False)) #词表太小，token表示效率太低
 tokenizer.decode(list(filter(lambda x: x != -100, tokenized_ds[1]["labels"])))
 
-model = AutoModelForCausalLM.from_pretrained("/root/autodl-tmp/Llama-2-7b-chat-hf", low_cpu_mem_usage=True, torch_dtype=torch.half, device_map="auto")
+model = AutoModelForCausalLM.from_pretrained("/wangjiatai/weight/Llama-2-7b-chat-hf", low_cpu_mem_usage=True, torch_dtype=torch.half, device_map="auto")
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     model.resize_token_embeddings(len(tokenizer))
@@ -60,7 +60,7 @@ args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=args,
-    train_dataset=tokenized_ds.select(range(6000)),
+    train_dataset=tokenized_ds.select(range(6)),
     data_collator=DataCollatorForSeq2Seq(tokenizer=tokenizer, padding=True),
 )
 trainer.train()
@@ -68,3 +68,4 @@ model = model.cuda()
 ipt = tokenizer("Human: {}\n{}".format("考试有哪些技巧？", "").strip() + "\n\nAssistant: ", return_tensors="pt").to(model.device)
 tokenizer.decode(model.generate(**ipt, max_length=128, do_sample=True)[0], skip_special_tokens=True)
 torch.tensor(1e-8).half()
+trainer.model.save_pretrained('/wangjiatai/runs')
