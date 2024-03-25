@@ -2,7 +2,7 @@
 #但是现在都不需要，transformers都封装好了，只需要把数据准备好调用tokenizer就行了
 from transformers import AutoTokenizer
 sentence = 'I love you.'
-tokenizer = AutoTokenizer.from_pretrained('/root/autodl-tmp/bert-base-uncased')
+tokenizer = AutoTokenizer.from_pretrained('/Users/titus.w/Code/model/Llama-2-7b-chat-hf')
 #分词器tokenizer的tokenize方法可以直接分词
 tokens = tokenizer.tokenize(sentence)
 print(len(tokenizer.vocab))
@@ -15,7 +15,7 @@ str_sen = tokenizer.decode(ids, skip_special_tokens=False)
 # 截断
 ids = tokenizer.encode(sentence, max_length=2, truncation=True)
 # 填充
-ids = tokenizer.encode(sentence, padding="max_length", max_length=15)
+# ids = tokenizer.encode(sentence, padding="max_length", max_length=15)
 attention_mask = [1 if idx != 0 else 0 for idx in ids]
 token_type_ids = [0] * len(ids)
 #处理batch数据
@@ -26,3 +26,4 @@ res = tokenizer(sens)
 #当加载大模型分词器的时候我们添加相信远程代码的参数
 from transformers import AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained('THUDM/chatglm-6b', trust_remote_code=True)
+
